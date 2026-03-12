@@ -35,13 +35,21 @@ NanoBananaBatchPy 是一个专门用于批量检测和移除图片中 Nano Banan
 
 ## 使用方法
 
-### 方法一：直接运行批处理文件
+### 方法一：使用可执行文件（推荐）
+
+1. 从 [GitHub Releases](https://github.com/w243420707/NanoBananaBatchPy/releases) 页面下载最新版本的 `NanoBananaBatch.exe`
+2. 将可执行文件放在包含需要处理图片的目录中
+3. 双击运行 `NanoBananaBatch.exe`
+4. 程序会自动扫描当前目录及其子目录中的图片文件
+5. 处理完成后，会在当前目录生成处理日志
+
+### 方法二：直接运行批处理文件
 
 1. 双击 `run_nano_banana_batch.bat` 文件
 2. 程序会自动扫描当前目录及其子目录中的图片文件
 3. 处理完成后，会在当前目录生成处理日志
 
-### 方法二：通过命令行运行
+### 方法三：通过命令行运行
 
 1. 打开命令行终端
 2. 导航到项目目录
