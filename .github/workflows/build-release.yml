@@ -29,7 +29,7 @@ jobs:
         
     - name: Build executable
       run: |
-        pyinstaller --onefile --name NanoBananaBatch --add-data "public/assets;public/assets" nano_banana_batch.py
+        pyinstaller --onefile --name NanoBananaBatch --add-data "public;public" nano_banana_batch.py
         
     - name: Create Release
       uses: softprops/action-gh-release@v2

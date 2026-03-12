@@ -36,6 +36,9 @@ class ImageTask:
 
 
 def script_root() -> Path:
+    import sys
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parent
 
 
