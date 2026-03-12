@@ -35,7 +35,7 @@ class ImageTask:
     relative_path: str
 
 
-def script_root() -> Path:
+def resource_root() -> Path:
     import sys
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)
@@ -43,7 +43,7 @@ def script_root() -> Path:
 
 
 def get_mask_path(file_name: str) -> Path:
-    return script_root() / "public" / "assets" / file_name
+    return resource_root() / "public" / "assets" / file_name
 
 
 def should_skip_file(file_name: str) -> bool:
@@ -288,7 +288,7 @@ def write_log(root_dir: Path, entries: list[tuple[str, str, str]]) -> None:
 
 
 def main() -> int:
-    root_dir = script_root()
+    root_dir = Path.cwd()
     print(f"扫描目录: {root_dir}")
 
     try:
