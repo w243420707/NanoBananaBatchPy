@@ -2,6 +2,8 @@ name: Build and Release
 
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*.*.*'
   workflow_dispatch:
@@ -32,6 +34,7 @@ jobs:
         pyinstaller --onefile --name NanoBananaBatch --add-data "public;public" --icon favicon.ico nano_banana_batch.py
         
     - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
         files: dist/NanoBananaBatch.exe
