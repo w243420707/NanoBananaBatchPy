@@ -354,6 +354,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                     return True, f"压缩成功，最低质量，大小: {len(buffer.getvalue()) / 1024:.2f}KB"
     except Exception as e:
         return False, f"压缩失败: {str(e)}"
+    # 确保函数总是返回一个值
+    return False, "压缩过程中发生未知错误"
 
 
 
