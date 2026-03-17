@@ -278,6 +278,7 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
             # 从高质量开始，逐步降低质量
             quality = 95
             step = 5
+            buffer_size = 0
             
             while quality >= 10:
                 # 保存到临时缓冲区
@@ -307,7 +308,11 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
             # 如果质量降到10以下仍然太大，尝试调整尺寸
             if quality < 10:
                 width, height = img.size
-                scale = (target_size / buffer_size) ** 0.5
+                if buffer_size > 0:
+                    scale = (target_size / buffer_size) ** 0.5
+                else:
+                    # 备用方案：默认缩小到原图的一半
+                    scale = 0.5
                 new_width = int(width * scale)
                 new_height = int(height * scale)
                 
