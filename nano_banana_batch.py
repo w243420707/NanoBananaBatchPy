@@ -258,6 +258,88 @@ def save_image(raw_pixels: list[int], image: Image.Image, output_path: Path, ext
     result.save(output_path, format="PNG")
 
 
+def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
+    """压缩图片到2M以内"""
+    target_size = 2 * 1024 * 1024  # 2MB
+    
+    if image_path.stat().st_size <= target_size:
+        return True, f"文件大小已小于2M，无需压缩"
+    
+    try:
+        with Image.open(image_path) as img:
+            # 对于PNG格式，先转换为RGB
+            if extension == ".png":
+                img = img.convert("RGB")
+                extension = ".jpg"
+                image_path = image_path.with_suffix(".jpg")
+            
+            # 从高质量开始，逐步降低质量
+            quality = 95
+            step = 5
+            
+            while quality >= 10:
+                # 保存到临时缓冲区
+                import io
+                buffer = io.BytesIO()
+                
+                if extension in {".jpg", ".jpeg"}:
+                    img.save(buffer, format="JPEG", quality=quality)
+                elif extension == ".webp":
+                    img.save(buffer, format="WEBP", quality=quality)
+                else:
+                    img.save(buffer, format="PNG")
+                
+                buffer_size = len(buffer.getvalue())
+                
+                if buffer_size <= target_size:
+                    # 保存到文件
+                    with open(image_path, "wb") as f:
+                        f.write(buffer.getvalue())
+                    return True, f"压缩成功，质量: {quality}，大小: {buffer_size / 1024:.2f}KB"
+                
+                quality -= step
+            
+            # 如果质量降到10以下仍然太大，尝试调整尺寸
+            if quality < 10:
+                width, height = img.size
+                scale = (target_size / buffer_size) ** 0.5
+                new_width = int(width * scale)
+                new_height = int(height * scale)
+                
+                resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                
+                buffer = io.BytesIO()
+                if extension in {".jpg", ".jpeg"}:
+                    resized_img.save(buffer, format="JPEG", quality=75)
+                elif extension == ".webp":
+                    resized_img.save(buffer, format="WEBP", quality=75)
+                else:
+                    resized_img.save(buffer, format="PNG")
+                
+                buffer_size = len(buffer.getvalue())
+                
+                if buffer_size <= target_size:
+                    with open(image_path, "wb") as f:
+                        f.write(buffer.getvalue())
+                    return True, f"压缩成功，调整尺寸: {new_width}x{new_height}，大小: {buffer_size / 1024:.2f}KB"
+                else:
+                    # 最后尝试最低质量
+                    buffer = io.BytesIO()
+                    if extension in {".jpg", ".jpeg"}:
+                        resized_img.save(buffer, format="JPEG", quality=10)
+                    elif extension == ".webp":
+                        resized_img.save(buffer, format="WEBP", quality=10)
+                    else:
+                        resized_img.save(buffer, format="PNG")
+                    
+                    with open(image_path, "wb") as f:
+                        f.write(buffer.getvalue())
+                    return True, f"压缩成功，最低质量，大小: {len(buffer.getvalue()) / 1024:.2f}KB"
+    except Exception as e:
+        return False, f"压缩失败: {str(e)}"
+
+
+
 def process_image(task: ImageTask, masks: dict[int, Mask]) -> tuple[str, str]:
     with Image.open(task.original_path) as source_image:
         rgba = source_image.convert("RGBA")
@@ -273,7 +355,14 @@ def process_image(task: ImageTask, masks: dict[int, Mask]) -> tuple[str, str]:
 
         reverse_alpha_blend(raw_pixels, mask, width, height)
         save_image(raw_pixels, rgba, task.original_path, task.extension)
-        return "cleaned", f"已覆盖 {task.original_path.name}"
+        
+        # 执行图片压缩
+        compress_success, compress_message = compress_image(task.original_path, task.extension)
+        if compress_success:
+            return "cleaned", f"已覆盖 {task.original_path.name}，{compress_message}"
+        else:
+            return "cleaned", f"已覆盖 {task.original_path.name}，压缩失败: {compress_message}"
+
 
 
 def write_log(root_dir: Path, entries: list[tuple[str, str, str]]) -> None:
