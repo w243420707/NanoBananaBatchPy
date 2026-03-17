@@ -258,6 +258,8 @@ def save_image(raw_pixels: list[int], image: Image.Image, output_path: Path, ext
     result.save(output_path, format="PNG")
 
 
+import io
+
 def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
     """压缩图片到2M以内"""
     target_size = 2 * 1024 * 1024  # 2MB
@@ -282,7 +284,6 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
             
             while quality >= 10:
                 # 保存到临时缓冲区
-                import io
                 buffer = io.BytesIO()
                 
                 if extension in {".jpg", ".jpeg"}:
@@ -290,8 +291,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                 elif extension == ".webp":
                     img.save(buffer, format="WEBP", quality=quality)
                 elif extension == ".png":
-                    # PNG格式使用压缩级别
-                    img.save(buffer, format="PNG", compress_level=9)
+                    # PNG格式使用中等压缩级别，提高处理速度
+                    img.save(buffer, format="PNG", compress_level=5)
                 else:
                     img.save(buffer, format="PNG")
                 
@@ -324,7 +325,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                 elif extension == ".webp":
                     resized_img.save(buffer, format="WEBP", quality=75)
                 elif extension == ".png":
-                    resized_img.save(buffer, format="PNG", compress_level=9)
+                    # PNG格式使用中等压缩级别，提高处理速度
+                    resized_img.save(buffer, format="PNG", compress_level=5)
                 else:
                     resized_img.save(buffer, format="PNG")
                 
@@ -342,7 +344,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                     elif extension == ".webp":
                         resized_img.save(buffer, format="WEBP", quality=10)
                     elif extension == ".png":
-                        resized_img.save(buffer, format="PNG", compress_level=9)
+                        # PNG格式使用中等压缩级别，提高处理速度
+                        resized_img.save(buffer, format="PNG", compress_level=5)
                     else:
                         resized_img.save(buffer, format="PNG")
                     
