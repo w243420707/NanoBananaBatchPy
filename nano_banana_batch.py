@@ -267,11 +267,13 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
     
     try:
         with Image.open(image_path) as img:
-            # 对于PNG格式，先转换为RGB
+            # 保持原始格式
             if extension == ".png":
+                # PNG格式保持不变
+                pass
+            elif extension in {".jpg", ".jpeg"}:
+                # JPEG格式转换为RGB
                 img = img.convert("RGB")
-                extension = ".jpg"
-                image_path = image_path.with_suffix(".jpg")
             
             # 从高质量开始，逐步降低质量
             quality = 95
@@ -286,6 +288,9 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                     img.save(buffer, format="JPEG", quality=quality)
                 elif extension == ".webp":
                     img.save(buffer, format="WEBP", quality=quality)
+                elif extension == ".png":
+                    # PNG格式使用压缩级别
+                    img.save(buffer, format="PNG", compress_level=9)
                 else:
                     img.save(buffer, format="PNG")
                 
@@ -313,6 +318,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                     resized_img.save(buffer, format="JPEG", quality=75)
                 elif extension == ".webp":
                     resized_img.save(buffer, format="WEBP", quality=75)
+                elif extension == ".png":
+                    resized_img.save(buffer, format="PNG", compress_level=9)
                 else:
                     resized_img.save(buffer, format="PNG")
                 
@@ -329,6 +336,8 @@ def compress_image(image_path: Path, extension: str) -> tuple[bool, str]:
                         resized_img.save(buffer, format="JPEG", quality=10)
                     elif extension == ".webp":
                         resized_img.save(buffer, format="WEBP", quality=10)
+                    elif extension == ".png":
+                        resized_img.save(buffer, format="PNG", compress_level=9)
                     else:
                         resized_img.save(buffer, format="PNG")
                     
